@@ -1,2 +1,4 @@
 .idea
 config.yml
+dist/
+github.env
