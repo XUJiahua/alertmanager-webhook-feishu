@@ -113,6 +113,37 @@ func (s Sdk) TenantAccessToken() (*tokenResponse, error) {
 	return &response, nil
 }
 
+type webhookV2Response struct {
+	StatusCode    int    `json:"StatusCode"`
+	StatusMessage string `json:"StatusMessage"`
+}
+
+func (s Sdk) WebhookV2(webhook string, body io.Reader) error {
+	req, err := http.NewRequest("POST", webhook, body)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	do, err := s.client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer do.Body.Close()
+
+	var resp webhookV2Response
+	err = json.NewDecoder(do.Body).Decode(&resp)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 0 {
+		return errors.New(fmt.Sprintf("code: %d, err: %s", resp.StatusCode, resp.StatusMessage))
+	}
+
+	return nil
+}
+
 func (s Sdk) get(url string, auth string, responseBody interface{}) error {
 	return s.call("GET", url, auth, nil, responseBody)
 }

@@ -2,25 +2,17 @@ package feishu
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/xujiahua/alertmanager-webhook-feishu/config"
 	"github.com/xujiahua/alertmanager-webhook-feishu/model"
 	"github.com/xujiahua/alertmanager-webhook-feishu/tmpl"
-	"net/http"
 	"text/template"
 )
-
-type fsWebhookResponse struct {
-	StatusCode    int    `json:"StatusCode"`
-	StatusMessage string `json:"StatusMessage"`
-}
 
 type Bot struct {
 	webhook string
 	openIDs []string
-	client  http.Client
+	sdk     *Sdk
 	tpl     *template.Template
 }
 
@@ -37,7 +29,7 @@ func New(bot *config.Bot, helper *EmailHelper) (*Bot, error) {
 	return &Bot{
 		webhook: bot.Webhook,
 		openIDs: openIDs,
-		client:  http.Client{},
+		sdk:     NewSDK("", ""),
 		tpl:     tpl,
 	}, nil
 }
@@ -91,34 +83,12 @@ func (b Bot) Send(alerts *model.WebhookMessage) error {
 	// attach @xxx
 	alerts.OpenIDs = b.openIDs
 
+	// prepare data
 	var buf bytes.Buffer
 	err := b.tpl.Execute(&buf, alerts)
 	if err != nil {
 		return err
 	}
 
-	// TODO: move to sdk
-	req, err := http.NewRequest("POST", b.webhook, &buf)
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := b.client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	var fsResp fsWebhookResponse
-	err = json.NewDecoder(resp.Body).Decode(&fsResp)
-	if err != nil {
-		return err
-	}
-
-	if fsResp.StatusCode != 0 {
-		return errors.New(fmt.Sprintf("code: %d, err: %s", fsResp.StatusCode, fsResp.StatusMessage))
-	}
-
-	return nil
+	return b.sdk.WebhookV2(b.webhook, &buf)
 }
