@@ -2,18 +2,15 @@ package feishu
 
 import (
 	"bytes"
-	"embed"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/xujiahua/alertmanager-webhook-feishu/config"
 	"github.com/xujiahua/alertmanager-webhook-feishu/model"
+	"github.com/xujiahua/alertmanager-webhook-feishu/tmpl"
 	"net/http"
 	"text/template"
 )
-
-//go:embed default.gojson
-var f embed.FS
 
 type fsWebhookResponse struct {
 	StatusCode    int    `json:"StatusCode"`
@@ -28,12 +25,14 @@ type Bot struct {
 }
 
 func New(bot *config.Bot, helper *EmailHelper) (*Bot, error) {
+	// @xxx
 	openIDs, err := getOpenIDs(bot.Mention, helper)
 	if err != nil {
 		return nil, err
 	}
 
-	tpl := template.Must(template.ParseFS(f, "default.gojson"))
+	// template
+	tpl, err := getTemplate(bot.Template)
 
 	return &Bot{
 		webhook: bot.Webhook,
@@ -66,16 +65,40 @@ func getOpenIDs(mention *config.Mention, helper *EmailHelper) ([]string, error) 
 	return openIDs, nil
 }
 
+func getTemplate(tmplConf *config.Template) (*template.Template, error) {
+	if tmplConf != nil && tmplConf.CustomPath != "" {
+		t, err := tmpl.GetCustomTemplate(tmplConf.CustomPath)
+		if err != nil {
+			return nil, err
+		}
+		return t, nil
+	}
+
+	filename := "default.tmpl"
+	if tmplConf != nil && tmplConf.EmbedFilename != "" {
+		filename = tmplConf.EmbedFilename
+	}
+
+	t, err := tmpl.GetEmbedTemplate(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	return t, nil
+}
+
 func (b Bot) Send(alerts *model.WebhookMessage) error {
 	// attach @xxx
 	alerts.OpenIDs = b.openIDs
 
-	fsMessage, err := b.toFeishuCard(alerts)
+	var buf bytes.Buffer
+	err := b.tpl.Execute(&buf, alerts)
 	if err != nil {
 		return err
 	}
 
-	req, err := http.NewRequest("POST", b.webhook, bytes.NewBufferString(fsMessage))
+	// TODO: move to sdk
+	req, err := http.NewRequest("POST", b.webhook, &buf)
 	if err != nil {
 		return err
 	}
@@ -98,14 +121,4 @@ func (b Bot) Send(alerts *model.WebhookMessage) error {
 	}
 
 	return nil
-}
-
-// TODO: template factory
-func (b Bot) toFeishuCard(alerts *model.WebhookMessage) (string, error) {
-	var buf bytes.Buffer
-	err := b.tpl.Execute(&buf, alerts)
-	if err != nil {
-		return "", err
-	}
-	return buf.String(), nil
 }

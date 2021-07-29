@@ -20,7 +20,7 @@
 - [x] 支持多个飞书机器人（一个飞书机器人对应一个群）
 - [ ] [签名校验](https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN#348211be)
 - [ ] 配置可 reload
-- [ ] 自定义飞书模板
+- [x] 自定义飞书模板
 - [x] @所有人 支持
 - [x] @某人 支持 open_id
 - [x] @某人 支持 email  @20210729 [官方没有直接支持](https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN#4996824a) ，我们可以申请一个飞书应用，通过 email 获取 open_id。

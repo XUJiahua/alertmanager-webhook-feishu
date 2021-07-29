@@ -11,10 +11,20 @@ type Mention struct {
 	OpenIDs []string `yaml:"open_ids"`
 }
 
+// Template 3 options:
+// nil -> default.tmpl,
+// EmbedFilename -> embedded xxx.tmpl,
+// CustomPath -> path/to/tmpl/file
+type Template struct {
+	EmbedFilename string `yaml:"embed_filename"`
+	CustomPath    string `yaml:"custom_path"`
+}
+
 type Bot struct {
 	// Bot Webhook URL
-	Webhook string   `yaml:"url"`
-	Mention *Mention `yaml:"mention"`
+	Webhook  string    `yaml:"url"`
+	Mention  *Mention  `yaml:"mention"`
+	Template *Template `yaml:"template"`
 }
 
 type App struct {

@@ -1,41 +1,18 @@
-package feishu
+package tmpl
 
 import (
 	"github.com/prometheus/alertmanager/template"
 	"github.com/stretchr/testify/require"
-	"github.com/xujiahua/alertmanager-webhook-feishu/config"
 	"github.com/xujiahua/alertmanager-webhook-feishu/model"
+	"os"
 	"testing"
 	"time"
 )
 
-func getConf() *config.Config {
-	conf, err := config.Load("../config.yml")
-	if err != nil {
-		panic(err)
-	}
-	return conf
-}
-
-func getBotConf() *config.Bot {
-	for _, bot := range getConf().Bots {
-		if bot.Mention != nil && bot.Mention.Emails != nil {
-			continue
-		}
-		return bot
-	}
-	panic("expect at least one")
-}
-
-func getAppConf() *config.App {
-	return getConf().App
-}
-
-func TestBot_Send(t *testing.T) {
-	bot, err := New(getBotConf(), nil)
-	require.Nil(t, err)
+func TestFeishuCard(t *testing.T) {
 	alerts := model.WebhookMessage{Data: newAlerts()}
-	err = bot.Send(&alerts)
+	et := embedTemplates["default.tmpl"]
+	err := et.Execute(os.Stdout, alerts)
 	require.Nil(t, err)
 }
 
