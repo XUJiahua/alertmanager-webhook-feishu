@@ -1,26 +1,27 @@
-{{ define "__md_alert" }}
-    {{- /*gotype: github.com/xujiahua/alertmanager-webhook-feishu/model.Alert*/ -}}
-    **Labels** \n
-    {{- range .Labels.SortedPairs -}}  {{- .Name }}: {{ .Value -}} \n
-    {{- end -}}
-    **Annotations** \n
-    {{- range .Annotations.SortedPairs -}} {{- .Name }}: {{ .Value -}} \n
-    {{- end -}}
-    **Source:** [{{ .GeneratorURL }}]({{ .GeneratorURL -}}) \n**StartsAt:** {{.StartsAt -}} \n**EndsAt:** {{.EndsAt -}}
-{{- end -}}
-
 {
 "msg_type": "interactive",
 "card":
 {
 {{- /*gotype: github.com/xujiahua/alertmanager-webhook-feishu/model.WebhookMessage*/ -}}
 "elements": [
-{{ range .Alerts }}
+{{ range .FiringAlerts }}
     {
     "tag": "div",
     "text": {
     "tag": "lark_md",
-    "content": "{{ template "__md_alert" .}}"
+    "content": "{{.}}"
+    }
+    },
+    {
+    "tag": "hr"
+    },
+{{ end }}
+{{ range .ResolvedAlerts }}
+    {
+    "tag": "div",
+    "text": {
+    "tag": "lark_md",
+    "content": "{{.}}"
     }
     },
     {
@@ -32,7 +33,8 @@
 "elements": [
 {
 "tag": "lark_md",
-"content": "{{- range .OpenIDs -}} <at id={{.}}></at> {{- end -}}"
+"content": "{{range .OpenIDs}}
+<at id={{.}}></at>{{end}}"
 }
 ]
 }

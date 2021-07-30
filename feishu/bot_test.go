@@ -2,6 +2,7 @@ package feishu
 
 import (
 	"github.com/prometheus/alertmanager/template"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"github.com/xujiahua/alertmanager-webhook-feishu/config"
 	"github.com/xujiahua/alertmanager-webhook-feishu/model"
@@ -19,7 +20,7 @@ func getConf() *config.Config {
 
 func getBotConf() *config.Bot {
 	for _, bot := range getConf().Bots {
-		if bot.Mention != nil && bot.Mention.Emails != nil {
+		if bot.Mention != nil {
 			continue
 		}
 		return bot
@@ -32,6 +33,7 @@ func getAppConf() *config.App {
 }
 
 func TestBot_Send(t *testing.T) {
+	logrus.SetLevel(logrus.DebugLevel)
 	bot, err := New(getBotConf(), nil)
 	require.Nil(t, err)
 	alerts := model.WebhookMessage{Data: newAlerts()}
@@ -54,7 +56,7 @@ func newAlerts() template.Data {
 			template.Alert{
 				Annotations: map[string]string{"a_key_warn": "a_value_warn"},
 				Labels:      map[string]string{"l_key_warn": "l_value_warn"},
-				Status:      "warning",
+				Status:      "resolved",
 			},
 		},
 		CommonAnnotations: map[string]string{"ca_key": "ca_value"},

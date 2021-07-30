@@ -5,14 +5,31 @@ import (
 	"errors"
 	"strings"
 	"text/template"
+	"time"
 )
 
 //go:embed templates/*
 var fs embed.FS
 var embedTemplates map[string]*template.Template
 var customTemplates map[string]*template.Template
+var funcMap template.FuncMap
 
 func init() {
+	// func
+	funcMap = template.FuncMap{
+		"date": func(dt time.Time, zone string) string {
+			loc, err := time.LoadLocation(zone)
+			if err != nil {
+				return err.Error()
+			}
+			dt = dt.In(loc)
+			return dt.Format("2006-01-02 15:04:05")
+		},
+		"isNonZeroDate": func(dt time.Time) bool {
+			return !(dt == time.Time{})
+		},
+	}
+
 	// embed
 	dir, err := fs.ReadDir("templates")
 	if err != nil {
@@ -30,7 +47,7 @@ func init() {
 			continue
 		}
 
-		t, err := template.ParseFS(fs, "templates/"+filename)
+		t, err := template.New(filename).Funcs(funcMap).ParseFS(fs, "templates/"+filename)
 		if err != nil {
 			panic(err)
 		}
@@ -55,7 +72,7 @@ func GetCustomTemplate(filename string) (*template.Template, error) {
 		return t, nil
 	}
 
-	t, err := template.ParseFiles(filename)
+	t, err := template.New(filename).Funcs(funcMap).ParseFiles(filename)
 	if err != nil {
 		return nil, err
 	}

@@ -11,13 +11,11 @@ type Mention struct {
 	OpenIDs []string `yaml:"open_ids"`
 }
 
-// Template 3 options:
-// nil -> default.tmpl,
-// EmbedFilename -> embedded xxx.tmpl,
+// Template 2 options:
+// nil -> default.tmpl,default_alert.tmpl
 // CustomPath -> path/to/tmpl/file
 type Template struct {
-	EmbedFilename string `yaml:"embed_filename"`
-	CustomPath    string `yaml:"custom_path"`
+	CustomPath string `yaml:"custom_path"`
 }
 
 type Bot struct {

@@ -1,0 +1,15 @@
+{{- /*gotype: github.com/xujiahua/alertmanager-webhook-feishu/model.Alert*/ -}}
+**Labels**
+{{range .Labels.SortedPairs}}
+    {{- .Name }}: {{ .Value -}}
+{{end}}
+**Annotations**
+{{range .Annotations.SortedPairs}}
+    {{- .Name }}: {{ .Value -}}
+{{end}}
+{{if .GeneratorURL}}**[Source]({{.GeneratorURL}})**
+{{end -}}
+{{if isNonZeroDate .StartsAt}}**StartsAt:** {{date .StartsAt "Asia/Shanghai"}}
+{{end -}}
+{{if isNonZeroDate .EndsAt}}**EndsAt:** {{date .EndsAt "Asia/Shanghai"}}
+{{end -}}

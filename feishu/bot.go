@@ -3,17 +3,21 @@ package feishu
 import (
 	"bytes"
 	"errors"
+	"fmt"
+	"github.com/sirupsen/logrus"
 	"github.com/xujiahua/alertmanager-webhook-feishu/config"
 	"github.com/xujiahua/alertmanager-webhook-feishu/model"
 	"github.com/xujiahua/alertmanager-webhook-feishu/tmpl"
+	"strings"
 	"text/template"
 )
 
 type Bot struct {
-	webhook string
-	openIDs []string
-	sdk     *Sdk
-	tpl     *template.Template
+	webhook  string
+	openIDs  []string
+	sdk      *Sdk
+	tpl      *template.Template
+	alertTpl *template.Template
 }
 
 func New(bot *config.Bot, helper *EmailHelper) (*Bot, error) {
@@ -24,13 +28,17 @@ func New(bot *config.Bot, helper *EmailHelper) (*Bot, error) {
 	}
 
 	// template
-	tpl, err := getTemplate(bot.Template)
+	tpl, alertTpl, err := getTemplates(bot.Template)
+	if err != nil {
+		return nil, err
+	}
 
 	return &Bot{
-		webhook: bot.Webhook,
-		openIDs: openIDs,
-		sdk:     NewSDK("", ""),
-		tpl:     tpl,
+		webhook:  bot.Webhook,
+		openIDs:  openIDs,
+		sdk:      NewSDK("", ""),
+		tpl:      tpl,
+		alertTpl: alertTpl,
 	}, nil
 }
 
@@ -57,26 +65,27 @@ func getOpenIDs(mention *config.Mention, helper *EmailHelper) ([]string, error) 
 	return openIDs, nil
 }
 
-func getTemplate(tmplConf *config.Template) (*template.Template, error) {
+func getTemplates(tmplConf *config.Template) (*template.Template, *template.Template, error) {
 	if tmplConf != nil && tmplConf.CustomPath != "" {
 		t, err := tmpl.GetCustomTemplate(tmplConf.CustomPath)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
-		return t, nil
+		return t, nil, nil
 	}
 
-	filename := "default.tmpl"
-	if tmplConf != nil && tmplConf.EmbedFilename != "" {
-		filename = tmplConf.EmbedFilename
-	}
-
-	t, err := tmpl.GetEmbedTemplate(filename)
+	// by default, use two tmpls, one is for alert
+	dt, err := tmpl.GetEmbedTemplate("default.tmpl")
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return t, nil
+	dat, err := tmpl.GetEmbedTemplate("default_alert.tmpl")
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return dt, dat, nil
 }
 
 func (b Bot) Send(alerts *model.WebhookMessage) error {
@@ -84,11 +93,47 @@ func (b Bot) Send(alerts *model.WebhookMessage) error {
 	alerts.OpenIDs = b.openIDs
 
 	// prepare data
-	var buf bytes.Buffer
-	err := b.tpl.Execute(&buf, alerts)
+	err := b.preprocessAlerts(alerts)
 	if err != nil {
 		return err
 	}
 
+	var buf bytes.Buffer
+	err = b.tpl.Execute(&buf, alerts)
+	if err != nil {
+		return err
+	}
+	if logrus.IsLevelEnabled(logrus.DebugLevel) {
+		fmt.Println(buf.String())
+	}
+
 	return b.sdk.WebhookV2(b.webhook, &buf)
+}
+
+func (b Bot) preprocessAlerts(alerts *model.WebhookMessage) error {
+	if b.alertTpl == nil {
+		return nil
+	}
+
+	// preprocess using alert template
+	for _, alert := range alerts.Alerts.Firing() {
+		var buf bytes.Buffer
+		err := b.alertTpl.Execute(&buf, alert)
+		if err != nil {
+			return err
+		}
+		res := strings.ReplaceAll(buf.String(), "\n", "\\n")
+		alerts.FiringAlerts = append(alerts.FiringAlerts, res)
+	}
+	for _, alert := range alerts.Alerts.Resolved() {
+		var buf bytes.Buffer
+		err := b.alertTpl.Execute(&buf, alert)
+		if err != nil {
+			return err
+		}
+		res := strings.ReplaceAll(buf.String(), "\n", "\\n")
+		alerts.ResolvedAlerts = append(alerts.ResolvedAlerts, res)
+	}
+
+	return nil
 }
