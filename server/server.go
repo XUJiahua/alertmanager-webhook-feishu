@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	"github.com/xujiahua/alertmanager-webhook-feishu/feishu"
 	"github.com/xujiahua/alertmanager-webhook-feishu/model"
@@ -50,9 +51,25 @@ func (s Server) hook(w http.ResponseWriter, r *http.Request) {
 	_, _ = fmt.Fprintf(w, "ok")
 }
 
+func (s Server) health(w http.ResponseWriter, r *http.Request) {
+	// TODO
+}
+
+func (s Server) reload(w http.ResponseWriter, r *http.Request) {
+	// TODO
+}
+
 func (s Server) Start(address string) error {
 	r := mux.NewRouter()
 	r.HandleFunc("/hook/{group}", s.hook)
+
+	// management etc...
+	sr := r.PathPrefix("/-").Subrouter()
+	sr.HandleFunc("/healthz", s.health)
+	sr.HandleFunc("/reload", s.health)
+
+	// prometheus
+	r.Handle("/metrics", promhttp.Handler())
 
 	srv := &http.Server{
 		Handler:      r,
