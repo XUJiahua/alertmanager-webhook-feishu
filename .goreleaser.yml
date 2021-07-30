@@ -12,6 +12,20 @@ builds:
       - linux
       - windows
       - darwin
+dockers:
+  -
+    # GOOS of the built binaries/packages that should be used.
+    goos: linux
+    # GOARCH of the built binaries/packages that should be used.
+    goarch: amd64
+    # Templates of the Docker image names.
+    image_templates:
+      - "johnxu1989/alertmanager-webhook-feishu:latest"
+      - "johnxu1989/alertmanager-webhook-feishu:{{ .Tag }}"
+
+    # Path to the Dockerfile (from the project root).
+    dockerfile: Dockerfile.goreleaser
+
 archives:
   - replacements:
       darwin: Darwin

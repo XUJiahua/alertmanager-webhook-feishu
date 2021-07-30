@@ -1,0 +1,6 @@
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+WORKDIR /app
+COPY alertmanager-webhook-feishu .
+EXPOSE 8000
+ENTRYPOINT ["./alertmanager-webhook-feishu"]
