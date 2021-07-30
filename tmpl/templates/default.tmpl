@@ -1,8 +1,16 @@
+{{- /*gotype: github.com/xujiahua/alertmanager-webhook-feishu/model.WebhookMessage*/ -}}
 {
 "msg_type": "interactive",
 "card":
 {
-{{- /*gotype: github.com/xujiahua/alertmanager-webhook-feishu/model.WebhookMessage*/ -}}
+"header": {
+"title": {
+"tag": "plain_text",
+"content": "{{if len .FiringAlerts}}[{{len .FiringAlerts}}]Alerts{{end}} {{if len .ResolvedAlerts}}[{{len .ResolvedAlerts}}]Resolved{{end}} {{range .Data.GroupLabels.SortedPairs}}{{.Name}}:{{.Value}} {{end}}"
+},
+"template":"{{if len .FiringAlerts}}red{{else}}green{{end}}"
+},
+
 "elements": [
 {{ range .FiringAlerts }}
     {
