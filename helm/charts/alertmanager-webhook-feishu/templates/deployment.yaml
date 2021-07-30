@@ -38,6 +38,7 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           args:
+            - "server"
             - "--config=/etc/alertmanager-webhook-feishu/config.yml"
             - "--email"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
