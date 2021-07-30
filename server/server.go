@@ -61,15 +61,15 @@ func (s Server) reload(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) Start(address string) error {
 	r := mux.NewRouter()
-	r.HandleFunc("/hook/{group}", s.hook)
+	r.HandleFunc("/hook/{group}", s.hook).Methods("POST")
 
 	// management etc...
 	sr := r.PathPrefix("/-").Subrouter()
-	sr.HandleFunc("/healthz", s.health)
-	sr.HandleFunc("/reload", s.health)
+	sr.HandleFunc("/healthz", s.health).Methods("GET")
+	sr.HandleFunc("/reload", s.health).Methods("GET")
 
 	// prometheus
-	r.Handle("/metrics", promhttp.Handler())
+	r.Handle("/metrics", promhttp.Handler()).Methods("GET")
 
 	srv := &http.Server{
 		Handler:      r,
