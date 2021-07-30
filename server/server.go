@@ -40,6 +40,7 @@ func (s Server) hook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	logrus.Debug(alerts)
 
 	err = bot.Send(&alerts)
 	if err != nil {
