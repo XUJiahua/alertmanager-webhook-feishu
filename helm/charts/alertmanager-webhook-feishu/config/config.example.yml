@@ -1,0 +1,19 @@
+bots:
+  webhook:
+    url: https://open.feishu.cn/open-apis/bot/v2/hook/xxx
+  webhook_mention_all:
+    url: https://open.feishu.cn/open-apis/bot/v2/hook/xxx
+    mention:
+      all: true
+  webhook_mention_openids:
+    url: https://open.feishu.cn/open-apis/bot/v2/hook/xxx
+    mention:
+      open_ids: [ "ou_70d31b7942cfb673038292e43daaa9c3","ou_177f84317c6ee52630edf335d5f8a6fc","ou_e7f2d4ea0b40a96f22c814574a6a791a" ]
+  webhook_mention_emails:
+    url: https://open.feishu.cn/open-apis/bot/v2/hook/xxx
+    mention:
+      emails: [ "john.xu@example.com" ]
+# 如果启用 mention.emails，需要配置飞书应用的 id/secret，用于获取到 open_id
+app:
+  id: ""
+  secret: ""
