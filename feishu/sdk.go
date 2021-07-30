@@ -113,12 +113,27 @@ func (s Sdk) TenantAccessToken() (*tokenResponse, error) {
 	return &response, nil
 }
 
+// wired response:
+// response of success
+//{
+//    "Extra": null,
+//    "StatusCode": 0,
+//    "StatusMessage": "success"
+//}
+// response of failure
+//{
+//    "code": 99991300,
+//    "msg": "invalid request body: not json, invalid character '\\n' in string literal"
+//}
 type webhookV2Response struct {
 	StatusCode    int    `json:"StatusCode"`
 	StatusMessage string `json:"StatusMessage"`
+	Code          int    `json:"code"`
+	Msg           string `json:"msg"`
 }
 
 func (s Sdk) WebhookV2(webhook string, body io.Reader) error {
+	logrus.Debug(webhook, body)
 	req, err := http.NewRequest("POST", webhook, body)
 	if err != nil {
 		return err
@@ -136,9 +151,10 @@ func (s Sdk) WebhookV2(webhook string, body io.Reader) error {
 	if err != nil {
 		return err
 	}
+	logrus.Debug(resp)
 
-	if resp.StatusCode != 0 {
-		return errors.New(fmt.Sprintf("code: %d, err: %s", resp.StatusCode, resp.StatusMessage))
+	if resp.Code != 0 {
+		return errors.New(fmt.Sprintf("code: %d, err: %s", resp.Code, resp.Msg))
 	}
 
 	return nil
