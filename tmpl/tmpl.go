@@ -3,6 +3,7 @@ package tmpl
 import (
 	"embed"
 	"errors"
+	"github.com/sirupsen/logrus"
 	"strings"
 	"text/template"
 	"time"
@@ -20,6 +21,7 @@ func init() {
 		"date": func(dt time.Time, zone string) string {
 			loc, err := time.LoadLocation(zone)
 			if err != nil {
+				logrus.Error(err)
 				return err.Error()
 			}
 			dt = dt.In(loc)

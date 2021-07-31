@@ -69,6 +69,7 @@ var serverCmd = &cobra.Command{
 			bot, err := feishu.New(botCfg, emailHelper)
 			handleErr(err)
 			bots[group] = bot
+			logrus.Infof("bot %s created", group)
 		}
 
 		// start server
