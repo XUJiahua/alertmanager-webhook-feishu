@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
@@ -40,7 +41,9 @@ func (s Server) hook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	logrus.Debug(alerts)
+	if logrus.IsLevelEnabled(logrus.DebugLevel) {
+		spew.Dump(alerts)
+	}
 
 	err = bot.Send(&alerts)
 	if err != nil {
