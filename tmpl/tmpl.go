@@ -30,6 +30,10 @@ func init() {
 		"isNonZeroDate": func(dt time.Time) bool {
 			return !(dt == time.Time{})
 		},
+		"in": func(m map[string]string, key string) bool {
+			_, ok := m[key]
+			return ok
+		},
 	}
 
 	// embed

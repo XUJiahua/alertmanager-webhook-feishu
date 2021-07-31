@@ -6,13 +6,25 @@
 "header": {
 "title": {
 "tag": "plain_text",
-"content": "{{if len .FiringAlerts}}[{{len .FiringAlerts}}]Alerts{{end}} {{if len .ResolvedAlerts}}[{{len .ResolvedAlerts}}]Resolved{{end}} {{range .Data.GroupLabels.SortedPairs}}{{.Name}}:{{.Value}} {{end}}"
+"content": "{{if in .GroupLabels "alertname"}}{{.GroupLabels.alertname}}{{else}}no_alertname{{end}} {{if len .FiringAlerts}}[{{len .FiringAlerts}}] Firing{{end}} {{if len .ResolvedAlerts}}[{{len .ResolvedAlerts}}] Resolved{{end}}"
 },
 "template":"{{if len .FiringAlerts}}red{{else}}green{{end}}"
 },
 
 "elements": [
-{{ range .FiringAlerts }}
+{{if .FiringAlerts}}
+    {
+    "tag": "div",
+    "text": {
+    "tag": "lark_md",
+    "content": "**FiringAlerts**"
+    }
+    },
+    {
+    "tag": "hr"
+    },
+{{end}}
+{{range .FiringAlerts}}
     {
     "tag": "div",
     "text": {
@@ -24,6 +36,18 @@
     "tag": "hr"
     },
 {{ end }}
+{{if .ResolvedAlerts}}
+    {
+    "tag": "div",
+    "text": {
+    "tag": "lark_md",
+    "content": "**ResolvedAlerts**"
+    }
+    },
+    {
+    "tag": "hr"
+    },
+{{end}}
 {{ range .ResolvedAlerts }}
     {
     "tag": "div",

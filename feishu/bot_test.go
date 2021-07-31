@@ -1,6 +1,7 @@
 package feishu
 
 import (
+	"github.com/davecgh/go-spew/spew"
 	"github.com/prometheus/alertmanager/template"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
@@ -38,6 +39,7 @@ func TestBot_Send(t *testing.T) {
 	require.Nil(t, err)
 	alerts := model.WebhookMessage{Data: newAlerts()}
 	err = bot.Send(&alerts)
+	spew.Dump(err)
 	require.Nil(t, err)
 }
 
@@ -46,9 +48,11 @@ func newAlerts() template.Data {
 	return template.Data{
 		Alerts: template.Alerts{
 			template.Alert{
-				Status:       "firing",
-				Annotations:  map[string]string{"a_key": "a_value"},
-				Labels:       map[string]string{"l_key": "l_value"},
+				Status: "firing",
+				Annotations: map[string]string{
+					"description": "26.09% throttling of CPU in namespace monitoring for container node-exporter in pod node-exporter-h5sjn",
+					"runbook_url": "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-cputhrottlinghigh"},
+				Labels:       map[string]string{"l_key": "l_value", "m_key": "m_value"},
 				StartsAt:     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
 				EndsAt:       time.Date(2000, 1, 1, 0, 0, 1, 0, time.UTC),
 				GeneratorURL: "file://generatorUrl",
@@ -57,6 +61,7 @@ func newAlerts() template.Data {
 				Annotations: map[string]string{"a_key_warn": "a_value_warn"},
 				Labels:      map[string]string{"l_key_warn": "l_value_warn"},
 				Status:      "resolved",
+				StartsAt:    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
 		},
 		CommonAnnotations: map[string]string{"ca_key": "ca_value"},
