@@ -2,22 +2,64 @@
 
 ## 自定义机器人
 
-首先你需要对飞书机器人有点[了解](https://open.feishu.cn/document/ukTMukTMukTM/uATM04CMxQjLwEDN) 。当前使用 [自定义机器人](https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN) 转发来自 AlertManager 的告警。
+首先你需要对飞书机器人有点[了解](https://open.feishu.cn/document/ukTMukTMukTM/uATM04CMxQjLwEDN) 。我们使用 [自定义机器人](https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN) 转发来自 AlertManager 的告警。
 
-自定义机器人相比其他机器人的好处是免应用创建，不需要维护 app_id/secret。
+自定义机器人相比应用机器人的好处是免应用创建，不需要维护 app_id/secret。
 
 [其他区别](https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN) @20210729：
 
 1. 自定义机器人只能用于在群聊中自动发送通知，不能响应用户@机器人的消息，不能获得任何的用户、租户信息。 
 2. 自定义机器人可以被添加至外部群使用，机器人应用只能在内部群使用。
-3. 自定义机器人发送的消息卡片，只支持跳转链接的交互方式，无法发送包含回传交互元素的消息卡片，不能通过消息卡片进行信息收集
+3. 自定义机器人发送的消息卡片，只支持跳转链接的交互方式，无法发送包含回传交互元素的消息卡片，不能通过消息卡片进行信息收集。
 4. 在消息卡片中如果要@提到某用户，请注意：自定义机器人仅支持通过 open_id 的方式实现，暂不支持email、user_id等其他方式。
 
-数据链路：Prometheus -> AlertManager -> alertmanager-webhook-feishu -> Feishu。
+## 使用
+
+基于参考配置文件 [config.example.yml](config.example.yml) 调整。运行：
+
+```bash
+$ alertmanager-webhook-feishu server --config=/path/to/config.yml
+```
+
+数据链路：Prometheus -> AlertManager -> alertmanager-webhook-feishu -> Feishu。AlertManager 配置文件中添加：
+
+```yaml
+receivers:
+  - name: 'you_name_it'
+    webhook_configs:
+    - url: 'http://alertmanager-webhook-feishu.monitoring/hook/your_group_name'
+      send_resolved: true
+```
+
+完整配置参数：
+
+```bash
+$ alertmanager-webhook-feishu server -h
+start webhook server
+
+Usage:
+  alertmanager-webhook-feishu server [flags]
+
+Flags:
+  -c, --config string   config file for bot webhook
+  -e, --email           if email supported, need feishu appid/secret for enabling
+  -h, --help            help for server
+  -p, --port int        server port (default 8000)
+
+Global Flags:
+  -v, --verbose   show verbose log
+
+```
+
+
+
+### helm chart
+
+见 [helm/charts/alertmanager-webhook-feishu](helm/charts/alertmanager-webhook-feishu)
 
 ## 功能列表
 
-- [x] 支持多个飞书机器人（一个飞书机器人对应一个群）
+- [x] 支持多个飞书机器人
 - [ ] [签名校验](https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN#348211be)
 - [ ] 配置可 reload
 - [x] 自定义飞书模板
@@ -29,5 +71,29 @@
 
 [open_id](https://open.feishu.cn/document/home/user-identity-introduction/open-id) 理论上用于标识一个 User ID 在具体某一应用中的身份。但是经过实践发现，随便某个应用下的 open_id 可以用于自定义机器人 @某人。很奇怪的设计。
 
+目前，为了能通过 email 得到 open_id，需要创建飞书「企业自建应用」。需要注意如下两点：
 
+1. 应用可用性：可用成员为「全部成员」。
+2. 最小权限：「通过手机号或邮箱获取用户 ID」。
+
+### 飞书消息模板
+
+[飞书参考链接](https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN#8b0f2a1b)
+
+当前的默认消息模板为「消息卡片」，见 [tmpl/templates/default.tmpl](tmpl/templates/default.tmpl)。其中，为每个 Alert 对象模板化输出了 markdown 文本，[飞书 markdown 只支持部分标签](https://open.feishu.cn/document/ukTMukTMukTM/uADOwUjLwgDM14CM4ATN)。（为 Alert 对象输出 markdown 文本使用了[独立的模板](tmpl/templates/default_alert.tmpl)，发现一个模板搞不定 - -!）
+
+- [ ] 飞书消息截图
+
+为了满足个性化需求，可以自定义模板。模板基于 go [text/template](https://golang.org/pkg/text/template/)。参考这个[链接](https://stackoverflow.com/questions/55170279/go-text-template-syntax-highlighting-in-goland)，配置编辑器的语法提示，提高配置速度。
+
+使用自定义模板：
+
+```yaml
+bots:
+  webhook:
+    url: https://open.feishu.cn/open-apis/bot/v2/hook/xxx
+    template:
+    	custom_path: /path/to/custom/path
+
+```
 

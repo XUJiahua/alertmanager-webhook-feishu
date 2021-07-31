@@ -1,7 +1,7 @@
 bots:
-  webhook:
+  webhook: # webhook 是 group name
     url: https://open.feishu.cn/open-apis/bot/v2/hook/xxx
-  webhook_mention_all:
+  webhook_mention_all: # group 可以理解为飞书机器人+圈人策略+飞书模板的组合
     url: https://open.feishu.cn/open-apis/bot/v2/hook/xxx
     mention:
       all: true
