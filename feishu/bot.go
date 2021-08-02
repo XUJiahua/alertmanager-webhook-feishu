@@ -2,6 +2,7 @@ package feishu
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/sirupsen/logrus"
@@ -104,7 +105,11 @@ func (b Bot) Send(alerts *model.WebhookMessage) error {
 		return err
 	}
 	if logrus.IsLevelEnabled(logrus.DebugLevel) {
-		fmt.Println(buf.String())
+		if d, err := beautifyJSON(buf.String()); err != nil {
+			logrus.Error(err)
+		} else {
+			fmt.Println(d)
+		}
 	}
 
 	return b.sdk.WebhookV2(b.webhook, &buf)
@@ -136,4 +141,17 @@ func (b Bot) preprocessAlerts(alerts *model.WebhookMessage) error {
 	}
 
 	return nil
+}
+
+func beautifyJSON(raw string) (string, error) {
+	data := make(map[string]interface{})
+	err := json.Unmarshal([]byte(raw), &data)
+	if err != nil {
+		return "", err
+	}
+	d, err := json.MarshalIndent(data, "", "\t")
+	if err != nil {
+		return "", err
+	}
+	return string(d), nil
 }
