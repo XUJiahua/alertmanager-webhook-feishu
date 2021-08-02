@@ -41,7 +41,6 @@ spec:
             - "server"
             - "--config=/etc/alertmanager-webhook-feishu/config.yml"
             - "--email"
-            - "--verbose"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
