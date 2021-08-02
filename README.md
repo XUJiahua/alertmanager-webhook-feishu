@@ -61,7 +61,7 @@ Global Flags:
 
 - [x] 支持多个飞书机器人
 - [ ] [签名校验](https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN#348211be)
-- [ ] 配置可 reload
+- [ ] 配置可 reload（配置更新，K8s 上可滚动部署，reload 功能不是必须的）
 - [x] 自定义飞书模板
 - [x] @所有人 支持
 - [x] @某人 支持 open_id
@@ -78,11 +78,42 @@ Global Flags:
 
 ### 飞书消息模板
 
-[飞书参考链接](https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN#8b0f2a1b)
+项目本质上是将数据结构 [model.WebhookMessage](model/model.go) 生成为 [飞书消息格式](https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN#8b0f2a1b) 发送到飞书服务器。
+
+#### 默认模板
 
 当前的默认消息模板为「消息卡片」，见 [tmpl/templates/default.tmpl](tmpl/templates/default.tmpl)。其中，为每个 Alert 对象模板化输出了 markdown 文本，[飞书 markdown 只支持部分标签](https://open.feishu.cn/document/ukTMukTMukTM/uADOwUjLwgDM14CM4ATN)。（为 Alert 对象输出 markdown 文本使用了[独立的模板](tmpl/templates/default_alert.tmpl)，发现一个模板搞不定 - -!）
 
-- [ ] 飞书消息截图
+默认模板适配 [kube-prometheus](https://github.com/prometheus-operator/kube-prometheus) 项目。比如，在模板中会使用如下 [Alert](https://github.com/prometheus-operator/kube-prometheus/blob/main/manifests/kubernetes-prometheusRule.yaml#L15) 的 labels 和 annotations。
+
+```yaml
+spec:
+  groups:
+  - name: kubernetes-apps
+    rules:
+    - alert: KubePodCrashLooping
+      annotations:
+        description: Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is restarting {{ printf "%.2f" $value }} times / 10 minutes.
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubepodcrashlooping
+        summary: Pod is crash looping.
+      expr: |
+        increase(kube_pod_container_status_restarts_total{job="kube-state-metrics"}[10m]) > 0
+        and
+        kube_pod_container_status_waiting{job="kube-state-metrics"} == 1
+      for: 15m
+      labels:
+        severity: warning
+
+```
+
+主要是如下字段：
+
+1. annotations.description 描述中已包含了指标 labels 的模板化输出。
+2. annotations.runbook_url 操作手册地址。（kube-prometheus 项目存在操作手册地址不存在或是更新不及时的情况，需要自己微调）
+3. annotations.summary 总结，信息量上，与 alertname 有点重合。
+4. labels.severity 严重程度。因为指标 labels 都有在 annotations.description 中有体现，其他 labels 没有必要在消息模板中进一步处理。
+
+#### 自定义模板
 
 为了满足个性化需求，可以自定义模板。模板基于 go [text/template](https://golang.org/pkg/text/template/)。参考这个[链接](https://stackoverflow.com/questions/55170279/go-text-template-syntax-highlighting-in-goland)，配置编辑器的语法提示，提高配置速度。
 

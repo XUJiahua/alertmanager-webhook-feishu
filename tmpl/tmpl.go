@@ -34,6 +34,7 @@ func init() {
 			_, ok := m[key]
 			return ok
 		},
+		"toUpper": strings.ToUpper,
 	}
 
 	// embed

@@ -1,12 +1,9 @@
 {{- /*gotype: github.com/xujiahua/alertmanager-webhook-feishu/model.Alert*/ -}}
-
-{{if in .Labels "namespace"}}{{.Labels.namespace}}{{else}}no_namespace{{end -}}
-.{{if in .Labels "pod"}}{{.Labels.pod}}{{else}}no_pod{{end -}}
-.{{if in .Labels "container"}}{{.Labels.container}}{{else}}no_container{{end -}}
-{{if in .Labels "severity"}}  {{.Labels.severity}}{{else}}  no_severity{{end}}
-{{- if .GeneratorURL}} [GeneratorURL]({{.GeneratorURL}}) {{end}}
-{{if in .Annotations "description"}}[{{.Annotations.description}}](
-{{- if in .Annotations "runbook_url"}}{{.Annotations.runbook_url}}{{end}}
-){{else}}no_description{{- end}}
+{{if in .Annotations "summary"}}**{{.Annotations.summary}}** {{end}}
+{{- if in .Labels "severity"}}{{.Labels.severity | toUpper}} {{end}}
+{{- if .GeneratorURL}}[GeneratorURL]({{.GeneratorURL}}){{end}}
+{{if in .Annotations "description"}}{{.Annotations.description}}
+{{- if in .Annotations "runbook_url"}} [操作手册]({{.Annotations.runbook_url}}){{end}}
+{{- end}}
 {{if isNonZeroDate .StartsAt}}{{date .StartsAt "Asia/Shanghai" }} ~{{end -}}
 {{- if isNonZeroDate .EndsAt}} {{date .EndsAt "Asia/Shanghai"}}{{else}} TO BE RESOLVED{{end -}}
