@@ -41,7 +41,7 @@
 "elements": [
 {
 "tag": "lark_md",
-"content": "{{range .OpenIDs}}
+"content": "{{range .Meta.SortedPairs}}{{.Name}}:{{.Value}}\t{{end}}{{range .OpenIDs}}
 <at id={{.}}></at>{{end}}"
 }
 ]

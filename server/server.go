@@ -10,6 +10,7 @@ import (
 	"github.com/xujiahua/alertmanager-webhook-feishu/feishu"
 	"github.com/xujiahua/alertmanager-webhook-feishu/model"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -25,6 +26,7 @@ func New(bots map[string]feishu.IBot) *Server {
 }
 
 func (s Server) hook(w http.ResponseWriter, r *http.Request) {
+	// get path param
 	vars := mux.Vars(r)
 	group := vars["group"]
 	bot, ok := s.bots[group]
@@ -34,6 +36,7 @@ func (s Server) hook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// get body param
 	var alerts model.WebhookMessage
 	err := json.NewDecoder(r.Body).Decode(&alerts)
 	if err != nil {
@@ -44,6 +47,15 @@ func (s Server) hook(w http.ResponseWriter, r *http.Request) {
 	if logrus.IsLevelEnabled(logrus.DebugLevel) {
 		spew.Dump(alerts)
 	}
+
+	// get query string
+	meta := make(map[string]string)
+	for key, values := range r.URL.Query() {
+		meta[key] = strings.Join(values, ",")
+	}
+	// also include path param
+	meta["group"] = group
+	alerts.Meta = meta
 
 	err = bot.Send(&alerts)
 	if err != nil {
