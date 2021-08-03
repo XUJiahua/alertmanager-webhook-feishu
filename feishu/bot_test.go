@@ -37,7 +37,11 @@ func TestBot_Send(t *testing.T) {
 	logrus.SetLevel(logrus.DebugLevel)
 	bot, err := New(getBotConf(), nil)
 	require.Nil(t, err)
-	alerts := model.WebhookMessage{Data: newAlerts(), Meta: map[string]string{"group": "hello", "seq": "2"}}
+	bot.openIDs = []string{"ou_177f84317c6ee52630edf335d5f8a6fc", "ou_177f84317c6ee52630edf335d5f8a6fc"}
+	alerts := model.WebhookMessage{
+		Data: newAlerts(),
+		Meta: map[string]string{"group": "hello", "seq": "2"},
+	}
 	err = bot.Send(&alerts)
 	spew.Dump(err)
 	require.Nil(t, err)
