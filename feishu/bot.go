@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/sirupsen/logrus"
 	"github.com/xujiahua/alertmanager-webhook-feishu/config"
 	"github.com/xujiahua/alertmanager-webhook-feishu/model"
@@ -107,6 +108,7 @@ func (b Bot) Send(alerts *model.WebhookMessage) error {
 	if logrus.IsLevelEnabled(logrus.DebugLevel) {
 		if d, err := beautifyJSON(buf.String()); err != nil {
 			logrus.Error(err)
+			spew.Dump(buf.String())
 		} else {
 			fmt.Println(d)
 		}
