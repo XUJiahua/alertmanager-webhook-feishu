@@ -66,6 +66,7 @@ Global Flags:
 - [x] @所有人 支持
 - [x] @某人 支持 open_id
 - [x] @某人 支持 email  @20210729 [官方没有直接支持](https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN#4996824a) ，我们可以申请一个飞书应用，通过 email 获取 open_id。
+- [ ] Prometheus 指标
 
 ### open_id 获取方式
 
