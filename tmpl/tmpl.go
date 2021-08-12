@@ -3,6 +3,7 @@ package tmpl
 import (
 	"embed"
 	"errors"
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"strings"
 	"text/template"
@@ -35,6 +36,10 @@ func init() {
 			return ok
 		},
 		"toUpper": strings.ToUpper,
+		"toLink": func(s string) string {
+			return fmt.Sprintf("[%s](%s)", s, s)
+		},
+		"contains": strings.Contains,
 	}
 
 	// embed

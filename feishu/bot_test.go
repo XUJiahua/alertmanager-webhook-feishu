@@ -40,7 +40,7 @@ func TestBot_Send(t *testing.T) {
 	bot.openIDs = []string{"ou_177f84317c6ee52630edf335d5f8a6fc", "ou_177f84317c6ee52630edf335d5f8a6fc"}
 	alerts := model.WebhookMessage{
 		Data: newAlerts(),
-		Meta: map[string]string{"group": "hello", "seq": "2"},
+		Meta: map[string]string{"group": "hello", "url": "www.baidu.com"},
 	}
 	err = bot.Send(&alerts)
 	spew.Dump(err)
