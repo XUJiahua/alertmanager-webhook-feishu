@@ -1,7 +1,5 @@
 {{- /*gotype: github.com/xujiahua/alertmanager-webhook-feishu/model.Alert*/ -}}
 {{if in .Annotations "summary"}}**{{.Annotations.summary}}** {{end}}
-{{- if in .Labels "severity"}}{{.Labels.severity | toUpper}} {{end}}
-{{- if .GeneratorURL}}[GeneratorURL]({{.GeneratorURL}}){{end}}
 {{if in .Annotations "description"}}{{.Annotations.description}}
 {{- if in .Annotations "runbook_url"}} [操作手册]({{.Annotations.runbook_url}}){{end}}
 {{- end}}
