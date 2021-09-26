@@ -130,6 +130,8 @@ func (b Bot) preprocessAlerts(alerts *model.WebhookMessage) error {
 			return err
 		}
 		res := strings.ReplaceAll(buf.String(), "\n", "\\n")
+		// feishu fix: escape "
+		res = strings.ReplaceAll(buf.String(), "\"", "\\\"")
 		// feishu fix: clean non printable char
 		res = stringsx.Clean(res)
 		alerts.FiringAlerts = append(alerts.FiringAlerts, res)
@@ -141,6 +143,8 @@ func (b Bot) preprocessAlerts(alerts *model.WebhookMessage) error {
 			return err
 		}
 		res := strings.ReplaceAll(buf.String(), "\n", "\\n")
+		// feishu fix: escape "
+		res = strings.ReplaceAll(buf.String(), "\"", "\\\"")
 		// feishu fix: clean non printable char
 		res = stringsx.Clean(res)
 		alerts.ResolvedAlerts = append(alerts.ResolvedAlerts, res)

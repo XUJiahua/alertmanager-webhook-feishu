@@ -1,6 +1,7 @@
 package feishu
 
 import (
+	"encoding/json"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/prometheus/alertmanager/template"
 	"github.com/sirupsen/logrus"
@@ -49,12 +50,18 @@ func TestBot_Send(t *testing.T) {
 
 // copyright: https://github.com/tomtom-international/alertmanager-webhook-logger/blob/master/main_test.go#L132
 func newAlerts() template.Data {
+	type Cat struct {
+		Name string
+	}
+	bs, _ := json.Marshal(&Cat{
+		Name: "cool cat",
+	})
 	return template.Data{
 		Alerts: template.Alerts{
 			template.Alert{
 				Status: "firing",
 				Annotations: map[string]string{
-					"description": "26.09% throttling of CPU in namespace monitoring for container node-exporter in pod node-exporter-h5sjn",
+					"description": "26.09% throttling of CPU in namespace monitoring for container node-exporter in pod node-exporter-h5sjn" + string(bs),
 					"runbook_url": "https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-cputhrottlinghigh",
 					"summary":     "summary",
 				},
