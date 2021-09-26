@@ -51,10 +51,15 @@ func TestBot_Send(t *testing.T) {
 // copyright: https://github.com/tomtom-international/alertmanager-webhook-logger/blob/master/main_test.go#L132
 func newAlerts() template.Data {
 	type Cat struct {
-		Name string
+		Name  string
+		BugMe string
 	}
 	bs, _ := json.Marshal(&Cat{
 		Name: "cool cat",
+	})
+	bs, _ = json.Marshal(&Cat{
+		Name:  "not cool cat",
+		BugMe: string(bs),
 	})
 	return template.Data{
 		Alerts: template.Alerts{

@@ -117,6 +117,18 @@ func (b Bot) Send(alerts *model.WebhookMessage) error {
 	return b.sdk.WebhookV2(b.webhook, &buf)
 }
 
+// field description may contain double quote, non printable chars
+func fixDescription(s string) string {
+	// feishu fix: clean non printable char
+	s = stringsx.Clean(s)
+	// feishu fix: unescape a string
+	s = fmt.Sprintf("%#v", s)
+	// remove prefix and suffix double quote, means we just unescape inner text
+	s = strings.TrimPrefix(s, "\"")
+	s = strings.TrimSuffix(s, "\"")
+	return s
+}
+
 func (b Bot) preprocessAlerts(alerts *model.WebhookMessage) error {
 	if b.alertTpl == nil {
 		return nil
@@ -125,28 +137,26 @@ func (b Bot) preprocessAlerts(alerts *model.WebhookMessage) error {
 	// preprocess using alert template
 	for _, alert := range alerts.Alerts.Firing() {
 		var buf bytes.Buffer
+		if _, ok := alert.Annotations["description"]; ok {
+			alert.Annotations["description"] = fixDescription(alert.Annotations["description"])
+		}
 		err := b.alertTpl.Execute(&buf, alert)
 		if err != nil {
 			return err
 		}
 		res := strings.ReplaceAll(buf.String(), "\n", "\\n")
-		// feishu fix: escape "
-		res = strings.ReplaceAll(buf.String(), "\"", "\\\"")
-		// feishu fix: clean non printable char
-		res = stringsx.Clean(res)
 		alerts.FiringAlerts = append(alerts.FiringAlerts, res)
 	}
 	for _, alert := range alerts.Alerts.Resolved() {
 		var buf bytes.Buffer
+		if _, ok := alert.Annotations["description"]; ok {
+			alert.Annotations["description"] = fixDescription(alert.Annotations["description"])
+		}
 		err := b.alertTpl.Execute(&buf, alert)
 		if err != nil {
 			return err
 		}
 		res := strings.ReplaceAll(buf.String(), "\n", "\\n")
-		// feishu fix: escape "
-		res = strings.ReplaceAll(buf.String(), "\"", "\\\"")
-		// feishu fix: clean non printable char
-		res = stringsx.Clean(res)
 		alerts.ResolvedAlerts = append(alerts.ResolvedAlerts, res)
 	}
 
