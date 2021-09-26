@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/icza/gox/stringsx"
 	"github.com/sirupsen/logrus"
 	"github.com/xujiahua/alertmanager-webhook-feishu/config"
 	"github.com/xujiahua/alertmanager-webhook-feishu/model"
@@ -129,6 +130,8 @@ func (b Bot) preprocessAlerts(alerts *model.WebhookMessage) error {
 			return err
 		}
 		res := strings.ReplaceAll(buf.String(), "\n", "\\n")
+		// feishu fix: clean non printable char
+		res = stringsx.Clean(res)
 		alerts.FiringAlerts = append(alerts.FiringAlerts, res)
 	}
 	for _, alert := range alerts.Alerts.Resolved() {
@@ -138,6 +141,8 @@ func (b Bot) preprocessAlerts(alerts *model.WebhookMessage) error {
 			return err
 		}
 		res := strings.ReplaceAll(buf.String(), "\n", "\\n")
+		// feishu fix: clean non printable char
+		res = stringsx.Clean(res)
 		alerts.ResolvedAlerts = append(alerts.ResolvedAlerts, res)
 	}
 

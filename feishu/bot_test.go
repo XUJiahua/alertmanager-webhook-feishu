@@ -65,7 +65,7 @@ func newAlerts() template.Data {
 			},
 			template.Alert{
 				Annotations: map[string]string{
-					"description": "26.09% throttling of CPU in namespace monitoring for container node-exporter in pod node-exporter-h5sjn",
+					"description": "\u001b26.09% throttling of CPU in namespace monitoring for container node-exporter in pod node-exporter-h5sjn",
 				},
 				Labels:   map[string]string{"l_key_warn": "l_value_warn"},
 				Status:   "resolved",
