@@ -18,7 +18,7 @@ import (
 func TestServer_hook(t *testing.T) {
 	bots := make(map[string]feishu.IBot)
 	bots["test"] = &feishu.FakeBot{}
-	s := New(bots)
+	s := New(bots, true)
 
 	tt := []struct {
 		group      string
@@ -92,7 +92,7 @@ func newAlerts() template.Data {
 			template.Alert{
 				Annotations: map[string]string{"a_key_warn": "a_value_warn"},
 				Labels:      map[string]string{"l_key_warn": "l_value_warn"},
-				Status:      "warning",
+				Status:      "resolved",
 			},
 		},
 		CommonAnnotations: map[string]string{"ca_key": "ca_value"},

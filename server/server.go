@@ -15,12 +15,14 @@ import (
 )
 
 type Server struct {
-	bots map[string]feishu.IBot
+	bots          map[string]feishu.IBot
+	splitByStatus bool
 }
 
-func New(bots map[string]feishu.IBot) *Server {
+func New(bots map[string]feishu.IBot, splitByStatus bool) *Server {
 	s := &Server{
-		bots: bots,
+		bots:          bots,
+		splitByStatus: splitByStatus,
 	}
 	return s
 }
@@ -55,16 +57,40 @@ func (s Server) hook(w http.ResponseWriter, r *http.Request) {
 	}
 	// also include path param
 	meta["group"] = group
-	alerts.Meta = meta
 
-	err = bot.Send(&alerts)
-	if err != nil {
-		logrus.Errorf("cannot send alerts, %s", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	var alertsGroups []model.WebhookMessage
+	if s.splitByStatus {
+		alertsGroups = split(alerts)
+	} else {
+		alertsGroups = []model.WebhookMessage{alerts}
+	}
+
+	for _, alerts := range alertsGroups {
+		alerts.Meta = meta
+		err = bot.Send(&alerts)
+		if err != nil {
+			logrus.Errorf("cannot send alerts, %s", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	_, _ = fmt.Fprintf(w, "ok")
+}
+
+func split(alerts model.WebhookMessage) []model.WebhookMessage {
+	var groups []model.WebhookMessage
+	if len(alerts.Alerts.Firing()) != 0 {
+		alertsClone := alerts
+		alertsClone.Alerts = alerts.Alerts.Firing()
+		groups = append(groups, alertsClone)
+	}
+	if len(alerts.Alerts.Resolved()) != 0 {
+		alertsClone := alerts
+		alertsClone.Alerts = alerts.Alerts.Resolved()
+		groups = append(groups, alertsClone)
+	}
+	return groups
 }
 
 func (s Server) health(w http.ResponseWriter, r *http.Request) {

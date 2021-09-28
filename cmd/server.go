@@ -1,24 +1,3 @@
-/*
-Copyright © 2021 xujiahua <littleguner@gmail.com>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
 package cmd
 
 import (
@@ -35,6 +14,7 @@ import (
 
 var port int
 var emailEnabled bool
+var splitByStatus bool
 var cfgFile string
 
 // serverCmd represents the server command
@@ -73,7 +53,7 @@ var serverCmd = &cobra.Command{
 		}
 
 		// start server
-		s := server.New(bots)
+		s := server.New(bots, splitByStatus)
 		go func() {
 			address := fmt.Sprintf("0.0.0.0:%d", port)
 			handleErr(s.Start(address))
@@ -95,5 +75,6 @@ func init() {
 
 	serverCmd.Flags().IntVarP(&port, "port", "p", 8000, "server port")
 	serverCmd.Flags().BoolVarP(&emailEnabled, "email", "e", false, "if email supported, need feishu appid/secret for enabling")
+	serverCmd.Flags().BoolVarP(&splitByStatus, "split", "", false, "if enabled, sending firing and resolved alerts in two notifications")
 	serverCmd.Flags().StringVarP(&cfgFile, "config", "c", "", "config file for bot webhook")
 }
