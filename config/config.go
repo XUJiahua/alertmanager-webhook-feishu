@@ -6,9 +6,10 @@ import (
 )
 
 type Mention struct {
-	All     bool     `yaml:"all"`
-	Emails  []string `yaml:"emails"`
-	OpenIDs []string `yaml:"open_ids"`
+	All      bool     `yaml:"all"`
+	Emails   []string `yaml:"emails"`
+	OpenIDs  []string `yaml:"open_ids"`
+	Rotation string   `yaml:"rotation"`
 }
 
 // Template 2 options:

@@ -8,15 +8,18 @@ import (
 	"github.com/icza/gox/stringsx"
 	"github.com/sirupsen/logrus"
 	"github.com/xujiahua/alertmanager-webhook-feishu/config"
+	"github.com/xujiahua/alertmanager-webhook-feishu/feishu/rotate"
 	"github.com/xujiahua/alertmanager-webhook-feishu/model"
 	"github.com/xujiahua/alertmanager-webhook-feishu/tmpl"
 	"strings"
 	"text/template"
+	"time"
 )
 
 type Bot struct {
 	webhook  string
 	openIDs  []string
+	rotator  *rotate.MentionRotator
 	sdk      *Sdk
 	tpl      *template.Template
 	alertTpl *template.Template
@@ -29,6 +32,14 @@ func New(bot *config.Bot, helper *EmailHelper) (*Bot, error) {
 		return nil, err
 	}
 
+	var rotator *rotate.MentionRotator
+	if bot.Mention != nil && bot.Mention.Rotation != "" && len(openIDs) > 1 {
+		rotator, err = rotate.New(bot.Mention.Rotation, openIDs)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	// template
 	tpl, alertTpl, err := getTemplates(bot.Template)
 	if err != nil {
@@ -37,6 +48,7 @@ func New(bot *config.Bot, helper *EmailHelper) (*Bot, error) {
 
 	return &Bot{
 		webhook:  bot.Webhook,
+		rotator:  rotator,
 		openIDs:  openIDs,
 		sdk:      NewSDK("", ""),
 		tpl:      tpl,
@@ -92,8 +104,11 @@ func getTemplates(tmplConf *config.Template) (*template.Template, *template.Temp
 
 func (b Bot) Send(alerts *model.WebhookMessage) error {
 	// attach @xxx
-	alerts.OpenIDs = b.openIDs
-
+	if b.rotator != nil {
+		alerts.OpenIDs = b.rotator.Rotate(time.Now())
+	} else {
+		alerts.OpenIDs = b.openIDs
+	}
 	// prepare data
 	err := b.preprocessAlerts(alerts)
 	if err != nil {

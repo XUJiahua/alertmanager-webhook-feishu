@@ -13,6 +13,11 @@ bots:
     url: https://open.feishu.cn/open-apis/bot/v2/hook/xxx
     mention:
       emails: [ "john.xu@example.com" ]
+  webhook_mention_rotation:
+    url: https://open.feishu.cn/open-apis/bot/v2/hook/xxx
+    mention:
+      open_ids: [ "ou_70d31b7942cfb673038292e43daaa9c3","ou_177f84317c6ee52630edf335d5f8a6fc","ou_e7f2d4ea0b40a96f22c814574a6a791a" ]
+      rotation: "2021-09-27:2w"
 # 如果启用 mention.emails，需要配置飞书应用的 id/secret，用于获取到 open_id
 app:
   id: ""
