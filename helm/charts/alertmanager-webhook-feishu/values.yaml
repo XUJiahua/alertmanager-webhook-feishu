@@ -8,7 +8,9 @@ image:
   repository: johnxu1989/alertmanager-webhook-feishu
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "v0.1.4"
+  tag: "v0.1.8"
+
+timezone: Asia/Shanghai
 
 imagePullSecrets: []
 nameOverride: ""

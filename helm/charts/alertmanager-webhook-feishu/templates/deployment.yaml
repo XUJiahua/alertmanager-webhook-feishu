@@ -42,6 +42,9 @@ spec:
             - "--config=/etc/alertmanager-webhook-feishu/config.yml"
             - "--email"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: TZ
+              value: {{ .Values.timezone }}
           ports:
             - name: http
               containerPort: 8000
