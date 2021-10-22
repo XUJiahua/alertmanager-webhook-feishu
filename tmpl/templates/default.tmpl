@@ -6,7 +6,7 @@
 "header": {
 "title": {
 "tag": "plain_text",
-"content": "{{if in .GroupLabels "alertname"}}{{.GroupLabels.alertname}} {{end}}{{if len .FiringAlerts}}[{{len .FiringAlerts}}] Firing {{end}}{{if len .ResolvedAlerts}}[{{len .ResolvedAlerts}}] Resolved{{end}}"
+"content": "{{.TitlePrefix}}{{if in .GroupLabels "alertname"}}{{.GroupLabels.alertname}} {{end}}{{if len .FiringAlerts}}[{{len .FiringAlerts}}] Firing {{end}}{{if len .ResolvedAlerts}}[{{len .ResolvedAlerts}}] Resolved{{end}}"
 },
 "template":"{{if len .FiringAlerts}}red{{else}}green{{end}}"
 },

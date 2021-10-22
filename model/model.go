@@ -14,6 +14,7 @@ type WebhookMessage struct {
 	// 首先，通过模板，将每个 Alert 转为字符串，大段文本都在 content 字段，需要注意转义。
 	FiringAlerts   []string
 	ResolvedAlerts []string
+	TitlePrefix    string
 }
 
 type Alert template.Alert

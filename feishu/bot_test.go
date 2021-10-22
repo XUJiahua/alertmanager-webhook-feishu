@@ -39,6 +39,7 @@ func TestBot_Send(t *testing.T) {
 	bot, err := New(getBotConf(), nil)
 	require.Nil(t, err)
 	bot.openIDs = []string{"ou_177f84317c6ee52630edf335d5f8a6fc", "ou_177f84317c6ee52630edf335d5f8a6fc"}
+	bot.titlePrefix = "[SHANGHAI]"
 	alerts := model.WebhookMessage{
 		Data: newAlerts(),
 		Meta: map[string]string{"group": "hello", "url": "www.baidu.com"},

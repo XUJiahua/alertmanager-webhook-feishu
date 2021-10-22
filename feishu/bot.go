@@ -17,12 +17,13 @@ import (
 )
 
 type Bot struct {
-	webhook  string
-	openIDs  []string
-	rotator  *rotate.MentionRotator
-	sdk      *Sdk
-	tpl      *template.Template
-	alertTpl *template.Template
+	webhook     string
+	openIDs     []string
+	rotator     *rotate.MentionRotator
+	sdk         *Sdk
+	tpl         *template.Template
+	alertTpl    *template.Template
+	titlePrefix string
 }
 
 func New(bot *config.Bot, helper *EmailHelper) (*Bot, error) {
@@ -47,12 +48,13 @@ func New(bot *config.Bot, helper *EmailHelper) (*Bot, error) {
 	}
 
 	return &Bot{
-		webhook:  bot.Webhook,
-		rotator:  rotator,
-		openIDs:  openIDs,
-		sdk:      NewSDK("", ""),
-		tpl:      tpl,
-		alertTpl: alertTpl,
+		webhook:     bot.Webhook,
+		rotator:     rotator,
+		openIDs:     openIDs,
+		sdk:         NewSDK("", ""),
+		tpl:         tpl,
+		alertTpl:    alertTpl,
+		titlePrefix: fmt.Sprintf("[%s]", bot.TitlePrefix),
 	}, nil
 }
 
@@ -109,6 +111,9 @@ func (b Bot) Send(alerts *model.WebhookMessage) error {
 	} else {
 		alerts.OpenIDs = b.openIDs
 	}
+	// title prefix
+	alerts.TitlePrefix = b.titlePrefix
+
 	// prepare data
 	err := b.preprocessAlerts(alerts)
 	if err != nil {

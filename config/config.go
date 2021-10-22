@@ -21,9 +21,10 @@ type Template struct {
 
 type Bot struct {
 	// Bot Webhook URL
-	Webhook  string    `yaml:"url"`
-	Mention  *Mention  `yaml:"mention"`
-	Template *Template `yaml:"template"`
+	Webhook     string    `yaml:"url"`
+	Mention     *Mention  `yaml:"mention"`
+	Template    *Template `yaml:"template"`
+	TitlePrefix string    `yaml:"title_prefix"`
 }
 
 type App struct {
