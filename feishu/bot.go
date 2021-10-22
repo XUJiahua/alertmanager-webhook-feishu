@@ -54,7 +54,7 @@ func New(bot *config.Bot, helper *EmailHelper) (*Bot, error) {
 		sdk:         NewSDK("", ""),
 		tpl:         tpl,
 		alertTpl:    alertTpl,
-		titlePrefix: fmt.Sprintf("[%s]", bot.TitlePrefix),
+		titlePrefix: bot.TitlePrefix,
 	}, nil
 }
 
