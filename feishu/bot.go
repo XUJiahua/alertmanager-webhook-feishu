@@ -24,6 +24,7 @@ type Bot struct {
 	tpl         *template.Template
 	alertTpl    *template.Template
 	titlePrefix string
+	metadata    map[string]string
 }
 
 func New(bot *config.Bot, helper *EmailHelper) (*Bot, error) {
@@ -55,6 +56,7 @@ func New(bot *config.Bot, helper *EmailHelper) (*Bot, error) {
 		tpl:         tpl,
 		alertTpl:    alertTpl,
 		titlePrefix: bot.TitlePrefix,
+		metadata:    bot.MetaData,
 	}, nil
 }
 
@@ -114,6 +116,9 @@ func (b Bot) Send(alerts *model.WebhookMessage) error {
 	// title prefix
 	alerts.TitlePrefix = b.titlePrefix
 
+	// merge metadata
+	alerts.Meta = mergeMap(alerts.Meta, b.metadata)
+
 	// prepare data
 	err := b.preprocessAlerts(alerts)
 	if err != nil {
@@ -135,6 +140,22 @@ func (b Bot) Send(alerts *model.WebhookMessage) error {
 	}
 
 	return b.sdk.WebhookV2(b.webhook, &buf)
+}
+
+// right is immutable
+func mergeMap(left, right map[string]string) map[string]string {
+	if len(right) == 0 {
+		return left
+	}
+	if left == nil {
+		left = make(map[string]string)
+	}
+	for k, v := range right {
+		if _, ok := left[k]; !ok {
+			left[k] = v
+		}
+	}
+	return left
 }
 
 // field description may contain double quote, non printable chars

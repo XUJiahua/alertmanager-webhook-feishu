@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"net/url"
 	"strings"
 	"text/template"
 	"time"
@@ -38,6 +39,13 @@ func init() {
 		"toUpper": strings.ToUpper,
 		"toLink": func(s string) string {
 			return fmt.Sprintf("[%s](%s)", s, s)
+		},
+		"displayKV": func(k, v string) string {
+			_, err := url.ParseRequestURI(v)
+			if err != nil {
+				return fmt.Sprintf("%s:%s", k, v)
+			}
+			return fmt.Sprintf("[%s](%s)", k, v)
 		},
 		"contains": strings.Contains,
 	}

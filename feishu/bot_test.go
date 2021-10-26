@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/xujiahua/alertmanager-webhook-feishu/config"
 	"github.com/xujiahua/alertmanager-webhook-feishu/model"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -40,6 +41,9 @@ func TestBot_Send(t *testing.T) {
 	require.Nil(t, err)
 	bot.openIDs = []string{"ou_177f84317c6ee52630edf335d5f8a6fc", "ou_177f84317c6ee52630edf335d5f8a6fc"}
 	bot.titlePrefix = "[SHANGHAI]"
+	bot.metadata = map[string]string{
+		"链接": "https://www.baidu.com",
+	}
 	alerts := model.WebhookMessage{
 		Data: newAlerts(),
 		Meta: map[string]string{"group": "hello", "url": "www.baidu.com"},
@@ -90,5 +94,62 @@ func newAlerts() template.Data {
 		GroupLabels:       map[string]string{"gl_key": "gl_value"},
 		ExternalURL:       "file://externalUrl",
 		Receiver:          "test-receiver",
+	}
+}
+
+func Test_mergeMap(t *testing.T) {
+	type args struct {
+		left  map[string]string
+		right map[string]string
+	}
+	tests := []struct {
+		name string
+		args args
+		want map[string]string
+	}{
+		{
+			args: args{
+				left: map[string]string{
+					"a": "1",
+					"b": "1",
+				},
+				right: map[string]string{
+					"a": "2",
+					"c": "2",
+				},
+			},
+			want: map[string]string{
+				"a": "1",
+				"b": "1",
+				"c": "2",
+			},
+		},
+		{
+			args: args{
+				left:  nil,
+				right: nil,
+			},
+			want: nil,
+		},
+		{
+			args: args{
+				left: nil,
+				right: map[string]string{
+					"a": "2",
+					"c": "2",
+				},
+			},
+			want: map[string]string{
+				"a": "2",
+				"c": "2",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := mergeMap(tt.args.left, tt.args.right); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("mergeMap() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

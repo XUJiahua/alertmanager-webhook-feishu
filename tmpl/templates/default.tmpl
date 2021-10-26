@@ -41,7 +41,7 @@
 "elements": [
 {
 "tag": "lark_md",
-"content": "{{range .Meta.SortedPairs}}{{.Name}}:{{if contains .Name "url"}}{{.Value | toLink}}{{else}}{{.Value}}{{end}}\t{{end}}{{range .OpenIDs}}<at id={{.}}></at> {{end}}"
+"content": "{{range .Meta.SortedPairs}}{{ displayKV .Name .Value}}\t{{end}}{{range .OpenIDs}}<at id={{.}}></at> {{end}}"
 }
 ]
 }
