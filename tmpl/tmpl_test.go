@@ -7,6 +7,8 @@ import (
 	"os"
 	"testing"
 	"time"
+	"path/filepath"
+	"runtime"
 )
 
 func TestFeishuCard(t *testing.T) {
@@ -40,4 +42,25 @@ func newAlerts() template.Data {
 		ExternalURL:       "file://externalUrl",
 		Receiver:          "test-receiver",
 	}
+}
+
+func unittestRelativePath() string {
+	_, file, _, ok := runtime.Caller(1)
+	if !ok {
+		file = ""
+	}
+
+	return filepath.Dir(filepath.FromSlash(file))
+}
+
+func TestGetCustomTemplate(t *testing.T) {
+	require := require.New(t)
+
+	tmpl, err := GetCustomTemplate(filepath.Join(unittestRelativePath(), "templates", "default.tmpl"))
+	require.NoError(err)
+	require.NotNil(tmpl)
+
+	alerts := model.WebhookMessage{Data: newAlerts()}
+	err = tmpl.Execute(os.Stdout, alerts)
+	require.NoError(err)
 }
