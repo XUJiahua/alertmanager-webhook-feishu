@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"net/url"
+	"path/filepath"
 	"strings"
 	"text/template"
 	"time"
@@ -92,7 +93,7 @@ func GetCustomTemplate(filename string) (*template.Template, error) {
 		return t, nil
 	}
 
-	t, err := template.New(filename).Funcs(funcMap).ParseFiles(filename)
+	t, err := template.New(filepath.Base(filename)).Funcs(funcMap).ParseFiles(filename)
 	if err != nil {
 		return nil, err
 	}
